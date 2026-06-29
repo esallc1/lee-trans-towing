@@ -151,10 +151,6 @@
   .btn-row { display: flex; gap: 0.5rem; }
   .btn-row .btn { flex: 1; }
 
-  #sms-status {
-    font-size: 0.8rem; margin-top: 0.5rem; text-align: center;
-    min-height: 1.2em; color: var(--green);
-  }
 
   /* JOB LOG — vertical in sidebar */
   #job-log-section {
@@ -359,10 +355,6 @@
       <!-- ACTIONS -->
       <div class="section">
         <div class="section-title">Actions</div>
-        <button class="btn btn-green" style="margin-bottom:0.5rem;" onclick="sendSMS()">
-          📱 Send SMS Confirmation
-        </button>
-        <div id="sms-status"></div>
         <div class="btn-row" style="margin-top:0.5rem;">
           <button class="btn btn-amber" onclick="logJob()">✅ Log Job</button>
           <button class="btn btn-ghost"  onclick="resetForm()">New Job</button>
@@ -582,38 +574,9 @@
   }
 
   /* OPERATOR STATUS */
-  function setOperatorBusy() {
-    document.getElementById('operator-dot').textContent   = '🔴';
-    document.getElementById('operator-label').textContent = 'Operator: Busy';
-  }
   function setOperatorAvailable() {
     document.getElementById('operator-dot').textContent   = '🟢';
-    document.getElementById('operator-label').textContent = 'Operator: Available';
-  }
-
-  /* SMS */
-  function sendSMS() {
-    const phone   = document.getElementById('cust-phone').value.trim();
-    const name    = document.getElementById('cust-name').value.trim() || 'Customer';
-    const pickup  = document.getElementById('pickup').value.trim()    || '(pickup)';
-    const dropoff = document.getElementById('dropoff').value.trim()   || '(drop-off)';
-    const quote   = document.getElementById('quote-total').value;
-    const jobType = document.getElementById('job-type').value;
-    const miles   = distanceMiles > 0 ? distanceMiles.toFixed(1) : '?';
-    const eta     = etaMinutes   > 0 ? etaMinutes : '?';
-    const navLink = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(pickup)}&destination=${encodeURIComponent(dropoff)}`;
-    const status  = document.getElementById('sms-status');
-    if (!phone) {
-      status.style.color = 'var(--danger)';
-      status.textContent = '⚠️ Enter a customer phone number first.';
-      return;
-    }
-    const msg = `NEW JOB — Lehigh Towing Service\nType: ${jobType}\nCustomer: ${name} (${phone})\nPickup: ${pickup}\nDrop-off: ${dropoff}\nDistance: ${miles} miles | ETA: ~${eta} min\nQuote: $${parseFloat(quote).toFixed(2)}\nNav: ${navLink}`;
-    window.open(`sms:${phone.replace(/\D/g,'')}?body=${encodeURIComponent(msg)}`, '_blank');
-    status.style.color = 'var(--green)';
-    status.textContent = '✅ SMS app opened — tap Send.';
-    setTimeout(() => status.textContent = '', 5000);
-    setOperatorBusy();
+    document.getElementById('operator-label').textContent = 'Available';
   }
 
   /* JOB LOG */
@@ -733,7 +696,6 @@
     ['rate-hook','rate-extra'].forEach(id => document.getElementById(id).value = 0);
     document.getElementById('job-type').value = 'Tow';
     clearRoute();
-    document.getElementById('sms-status').textContent = '';
   }
 </script>
 
