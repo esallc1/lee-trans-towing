@@ -292,7 +292,7 @@
         <label>Job Type</label>
         <select id="job-type" style="width:100%;padding:0.6rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.9rem;margin-bottom:0.75rem;">
           <option value="Tow">🚛 Tow</option>
-          <option value="Flatbed">Flatbed</option>
+          <option value="Flatbed">🚛 Flatbed</option>
           <option value="Lockout">🔑 Lockout</option>
           <option value="Jumpstart">⚡ Jumpstart</option>
           <option value="Roadside / Fuel">⛽ Roadside / Fuel</option>
@@ -681,8 +681,7 @@
   }
 
   function jobTypeLabel(type) {
-    if (type === 'Flatbed') return `<img src="flatbed.png" style="height:18px;vertical-align:middle;margin-right:4px;">Flatbed`;
-    const icons = { 'Tow': '🚛', 'Lockout': '🔑', 'Jumpstart': '⚡', 'Roadside / Fuel': '⛽' };
+    const icons = { 'Tow': '🚛', 'Flatbed': '🚛', 'Lockout': '🔑', 'Jumpstart': '⚡', 'Roadside / Fuel': '⛽' };
     return (icons[type] || '') + ' ' + (type || 'Tow');
   }
 
