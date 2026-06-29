@@ -156,44 +156,21 @@
     min-height: 1.2em; color: var(--green);
   }
 
-  /* JOB LOG STRIP */
-  #job-strip-wrap {
-    position: relative; flex-shrink: 0; background: var(--bg);
+  /* JOB LOG — vertical in sidebar */
+  #job-log-section {
     border-top: 2px solid var(--amber);
   }
-  #job-strip {
-    height: 188px; overflow-x: auto; overflow-y: hidden;
-    display: flex; align-items: stretch; scroll-behavior: smooth;
-  }
-  #job-strip::-webkit-scrollbar { height: 4px; }
-  #job-strip::-webkit-scrollbar-track { background: var(--bg); }
-  #job-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  #job-strip-inner {
-    display: flex; align-items: stretch; gap: 0; padding: 0;
-    min-width: 100%;
-  }
-  .strip-arrow {
-    position: absolute; top: 0; bottom: 0; width: 32px;
-    display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(to right, rgba(15,15,15,0.95), transparent);
-    border: none; color: var(--text); font-size: 1.1rem; cursor: pointer;
-    z-index: 4; opacity: 0; transition: opacity .2s; pointer-events: none;
-  }
-  .strip-arrow.right {
-    right: 0; left: auto;
-    background: linear-gradient(to left, rgba(15,15,15,0.95), transparent);
-  }
-  .strip-arrow.visible { opacity: 1; pointer-events: auto; }
+  #job-log-section .section-title { margin-bottom: 0; padding-bottom: 0.75rem; }
   .strip-empty {
-    display: flex; align-items: center; justify-content: center;
-    width: 100%; color: var(--muted); font-size: 0.85rem; font-style: italic;
+    padding: 1rem 0; color: var(--muted); font-size: 0.82rem;
+    font-style: italic; text-align: center;
   }
   .job-card {
-    flex: 0 0 280px; background: var(--surface); border-right: 1px solid var(--border);
-    padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 3px;
-    font-size: 0.78rem; position: relative; overflow: hidden;
+    width: 100%; background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.25rem; display: flex; flex-direction: column; gap: 4px;
+    font-size: 0.78rem;
   }
-  .job-card:hover { background: #222; }
+  .job-card:hover { background: #161616; }
   .job-card-num {
     font-size: 0.65rem; color: var(--muted); text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -268,12 +245,12 @@
     text-transform: uppercase; letter-spacing: 0.06em;
   }
   .btn-advance {
-    padding: 3px 10px; font-size: 0.7rem; font-weight: 700;
-    background: #333; color: var(--text); border: none;
-    border-radius: 4px; cursor: pointer;
+    padding: 6px 14px; font-size: 0.78rem; font-weight: 700;
+    background: #2a2a2a; color: var(--text); border: 1px solid #555;
+    border-radius: 6px; cursor: pointer; white-space: nowrap;
   }
-  .btn-advance:hover { background: var(--amber); color: #000; }
-  .btn-advance:disabled { opacity: 0.35; cursor: default; }
+  .btn-advance:hover { background: var(--amber); color: #000; border-color: var(--amber); }
+  .btn-advance:disabled { opacity: 0.35; cursor: default; background: #1a1a1a; border-color: #333; }
 
   .job-card-eta { font-size: 0.72rem; color: #94a3b8; margin-top: 1px; }
 </style>
@@ -301,7 +278,12 @@
 
       <div class="sidebar-header">
         <h2>🚛 Lehigh Towing Dispatch</h2>
-        <span class="badge" id="job-count">0 jobs</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="badge" id="job-count">0 jobs</span>
+          <span id="operator-strip" style="font-size:0.7rem;font-weight:600;white-space:nowrap;">
+            <span id="operator-dot">🟢</span> <span id="operator-label">Available</span>
+          </span>
+        </div>
       </div>
 
       <!-- CUSTOMER -->
@@ -387,6 +369,14 @@
         </div>
       </div>
 
+      <!-- JOB LOG -->
+      <div class="section" id="job-log-section">
+        <div class="section-title">Job Log</div>
+        <div id="job-strip-inner">
+          <div class="strip-empty">No jobs logged yet.</div>
+        </div>
+      </div>
+
     </div><!-- /sidebar -->
 
     <!-- MAP -->
@@ -410,22 +400,6 @@
 
   </div><!-- /top-row -->
 
-  <!-- OPERATOR STATUS -->
-  <div id="operator-strip">
-    <span id="operator-dot">🟢</span>
-    <span id="operator-label">Operator: Available</span>
-  </div>
-
-  <!-- JOB LOG STRIP -->
-  <div id="job-strip-wrap">
-    <button class="strip-arrow left"  id="strip-left"  onclick="stripScroll(-1)">&#8592;</button>
-    <button class="strip-arrow right" id="strip-right" onclick="stripScroll(1)">&#8594;</button>
-    <div id="job-strip">
-      <div id="job-strip-inner">
-        <div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>
-      </div>
-    </div>
-  </div>
 
 </div><!-- /app -->
 
@@ -437,7 +411,6 @@
       document.getElementById('app').style.display = 'flex';
       initMap();
       initPhoneFormat();
-      initStripScroll();
     } else {
       document.getElementById('login-error').style.display = 'block';
       document.getElementById('pwd-input').value = '';
@@ -461,23 +434,6 @@
     document.getElementById('cust-phone').addEventListener('input', formatPhone);
   }
 
-  /* STRIP SCROLL ARROWS */
-  function initStripScroll() {
-    const strip = document.getElementById('job-strip');
-    strip.addEventListener('scroll', updateArrows);
-    updateArrows();
-  }
-  function updateArrows() {
-    const strip = document.getElementById('job-strip');
-    const left  = document.getElementById('strip-left');
-    const right = document.getElementById('strip-right');
-    left.classList.toggle('visible',  strip.scrollLeft > 10);
-    right.classList.toggle('visible', strip.scrollLeft < strip.scrollWidth - strip.clientWidth - 10);
-  }
-  function stripScroll(dir) {
-    document.getElementById('job-strip').scrollBy({ left: dir * 300, behavior: 'smooth' });
-    setTimeout(updateArrows, 320);
-  }
 
   /* MAP */
   let map, directionsService, directionsRenderer, geocoder;
@@ -733,8 +689,7 @@
     document.getElementById('job-count').textContent = count + (count === 1 ? ' job' : ' jobs');
     const inner = document.getElementById('job-strip-inner');
     if (!count) {
-      inner.innerHTML = '<div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>';
-      updateArrows();
+      inner.innerHTML = '<div class="strip-empty">No jobs logged yet.</div>';
       return;
     }
     inner.innerHTML = jobs.map((j, i) => {
@@ -765,7 +720,6 @@
         </div>
       </div>`;
     }).join('');
-    updateArrows();
   }
 
   function resetForm() {
