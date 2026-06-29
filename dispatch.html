@@ -157,15 +157,33 @@
   }
 
   /* JOB LOG STRIP */
-  #job-strip {
-    background: var(--bg); border-top: 2px solid var(--amber);
-    height: 180px; min-height: 180px; overflow-x: auto; overflow-y: hidden;
-    display: flex; align-items: stretch; gap: 0; flex-shrink: 0;
+  #job-strip-wrap {
+    position: relative; flex-shrink: 0; background: var(--bg);
+    border-top: 2px solid var(--amber);
   }
+  #job-strip {
+    height: 188px; overflow-x: auto; overflow-y: hidden;
+    display: flex; align-items: stretch; scroll-behavior: smooth;
+  }
+  #job-strip::-webkit-scrollbar { height: 4px; }
+  #job-strip::-webkit-scrollbar-track { background: var(--bg); }
+  #job-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   #job-strip-inner {
     display: flex; align-items: stretch; gap: 0; padding: 0;
     min-width: 100%;
   }
+  .strip-arrow {
+    position: absolute; top: 0; bottom: 0; width: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(to right, rgba(15,15,15,0.95), transparent);
+    border: none; color: var(--text); font-size: 1.1rem; cursor: pointer;
+    z-index: 4; opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .strip-arrow.right {
+    right: 0; left: auto;
+    background: linear-gradient(to left, rgba(15,15,15,0.95), transparent);
+  }
+  .strip-arrow.visible { opacity: 1; pointer-events: auto; }
   .strip-empty {
     display: flex; align-items: center; justify-content: center;
     width: 100%; color: var(--muted); font-size: 0.85rem; font-style: italic;
@@ -331,9 +349,13 @@
   </div><!-- /top-row -->
 
   <!-- JOB LOG STRIP -->
-  <div id="job-strip">
-    <div id="job-strip-inner">
-      <div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>
+  <div id="job-strip-wrap">
+    <button class="strip-arrow left"  id="strip-left"  onclick="stripScroll(-1)">&#8592;</button>
+    <button class="strip-arrow right" id="strip-right" onclick="stripScroll(1)">&#8594;</button>
+    <div id="job-strip">
+      <div id="job-strip-inner">
+        <div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>
+      </div>
     </div>
   </div>
 
@@ -346,6 +368,8 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
       initMap();
+      initPhoneFormat();
+      initStripScroll();
     } else {
       document.getElementById('login-error').style.display = 'block';
       document.getElementById('pwd-input').value = '';
@@ -354,6 +378,38 @@
   document.getElementById('pwd-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') checkLogin();
   });
+
+  /* PHONE FORMAT — (xxx) xxx-xxxx */
+  function formatPhone(e) {
+    const input = e.target;
+    let digits = input.value.replace(/\D/g, '').slice(0, 10);
+    let fmt = '';
+    if (digits.length > 0) fmt  = '(' + digits.slice(0, 3);
+    if (digits.length >= 4) fmt += ') ' + digits.slice(3, 6);
+    if (digits.length >= 7) fmt += '-' + digits.slice(6, 10);
+    input.value = fmt;
+  }
+  function initPhoneFormat() {
+    document.getElementById('cust-phone').addEventListener('input', formatPhone);
+  }
+
+  /* STRIP SCROLL ARROWS */
+  function initStripScroll() {
+    const strip = document.getElementById('job-strip');
+    strip.addEventListener('scroll', updateArrows);
+    updateArrows();
+  }
+  function updateArrows() {
+    const strip = document.getElementById('job-strip');
+    const left  = document.getElementById('strip-left');
+    const right = document.getElementById('strip-right');
+    left.classList.toggle('visible',  strip.scrollLeft > 10);
+    right.classList.toggle('visible', strip.scrollLeft < strip.scrollWidth - strip.clientWidth - 10);
+  }
+  function stripScroll(dir) {
+    document.getElementById('job-strip').scrollBy({ left: dir * 300, behavior: 'smooth' });
+    setTimeout(updateArrows, 320);
+  }
 
   /* MAP */
   let map, directionsService, directionsRenderer, geocoder;
@@ -419,7 +475,8 @@
     pinMarkers[type] = new google.maps.Marker({
       position: latLng,
       map,
-      title: type === 'pickup' ? 'Pickup' : 'Drop-off',
+      draggable: true,
+      title: type === 'pickup' ? 'Pickup (drag to adjust)' : 'Drop-off (drag to adjust)',
       icon: {
         path: google.maps.SymbolPath.CIRCLE,
         scale: 10,
@@ -430,6 +487,14 @@
       }
     });
 
+    pinMarkers[type].addListener('dragend', e => {
+      reverseGeocode(type, e.latLng);
+    });
+
+    reverseGeocode(type, latLng);
+  }
+
+  function reverseGeocode(type, latLng) {
     geocoder.geocode({ location: latLng }, (results, status) => {
       if (status === 'OK' && results[0]) {
         document.getElementById(type).value = results[0].formatted_address;
