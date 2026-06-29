@@ -323,7 +323,7 @@
         <div class="section-title">Rate Calculator</div>
         <div class="rate-grid">
           <div>
-            <label>Base Rate ($)</label>
+            <label>Hook Up ($)</label>
             <input type="number" id="rate-base" value="80" min="0" oninput="calcQuote()">
           </div>
           <div>
@@ -342,7 +342,7 @@
         <div class="quote-box">
           <label>Total Quote</label>
           <span style="color:var(--amber);font-size:1.1rem;margin-bottom:0;">$</span>
-          <input type="number" class="quote-amount" id="quote-total" value="75.00" step="0.01" min="0">
+          <input type="number" class="quote-amount" id="quote-total" value="80" step="1" min="0">
         </div>
       </div>
 
@@ -570,7 +570,7 @@
     const mile  = parseFloat(document.getElementById('rate-mile').value)  || 0;
     const hook  = parseFloat(document.getElementById('rate-hook').value)  || 0;
     const extra = parseFloat(document.getElementById('rate-extra').value) || 0;
-    document.getElementById('quote-total').value = (base + mile * distanceMiles + hook + extra).toFixed(2);
+    document.getElementById('quote-total').value = Math.round(base + mile * distanceMiles + hook + extra);
   }
 
   /* OPERATOR STATUS */
