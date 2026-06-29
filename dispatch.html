@@ -81,8 +81,8 @@
 
   /* SIDEBAR */
   .sidebar {
-    width: 380px; min-width: 320px; background: var(--surface);
-    border-left: 1px solid var(--border); display: flex; flex-direction: column;
+    width: 28%; min-width: 300px; max-width: 400px; background: var(--surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
     overflow-y: auto;
   }
   .sidebar-header {
@@ -296,25 +296,6 @@
 
   <div class="top-row">
 
-    <!-- MAP -->
-    <div id="map-wrap">
-      <div id="map"></div>
-      <div class="pin-controls">
-        <button class="pin-btn pickup-pin" id="btn-pin-pickup" onclick="activatePin('pickup')">
-          📍 Drop Pickup Pin
-        </button>
-        <button class="pin-btn dropoff-pin" id="btn-pin-dropoff" onclick="activatePin('dropoff')">
-          📍 Drop Drop-off Pin
-        </button>
-      </div>
-      <div id="pin-hint"></div>
-      <div class="map-type-toggle">
-        <button class="map-type-btn" onclick="setMapType('roadmap')">Street</button>
-        <button class="map-type-btn" onclick="setMapType('satellite')">Satellite</button>
-        <button class="map-type-btn active" onclick="setMapType('hybrid')">Hybrid</button>
-      </div>
-    </div>
-
     <!-- SIDEBAR -->
     <div class="sidebar">
 
@@ -407,6 +388,26 @@
       </div>
 
     </div><!-- /sidebar -->
+
+    <!-- MAP -->
+    <div id="map-wrap">
+      <div id="map"></div>
+      <div class="pin-controls">
+        <button class="pin-btn pickup-pin" id="btn-pin-pickup" onclick="activatePin('pickup')">
+          📍 Drop Pickup Pin
+        </button>
+        <button class="pin-btn dropoff-pin" id="btn-pin-dropoff" onclick="activatePin('dropoff')">
+          📍 Drop Drop-off Pin
+        </button>
+      </div>
+      <div id="pin-hint"></div>
+      <div class="map-type-toggle">
+        <button class="map-type-btn" onclick="setMapType('roadmap')">Street</button>
+        <button class="map-type-btn" onclick="setMapType('satellite')">Satellite</button>
+        <button class="map-type-btn active" onclick="setMapType('hybrid')">Hybrid</button>
+      </div>
+    </div>
+
   </div><!-- /top-row -->
 
   <!-- OPERATOR STATUS -->
