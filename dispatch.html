@@ -17,9 +17,10 @@
     --muted:    #888;
     --danger:   #ef4444;
     --green:    #22c55e;
+    --blue:     #4285F4;
   }
 
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
   /* LOGIN */
   #login-screen {
@@ -46,10 +47,37 @@
   .btn-login:hover { background: var(--amber-dk); }
   #login-error { color: var(--danger); font-size: 0.85rem; margin-top: 0.75rem; display: none; }
 
-  /* APP */
-  #app { display: none; height: 100vh; overflow: hidden; }
-  .layout { display: flex; height: 100%; }
-  #map { flex: 1; height: 100%; }
+  /* APP — column layout: top row (map+sidebar) + bottom job strip */
+  #app { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+
+  .top-row { display: flex; flex: 1; min-height: 0; }
+
+  /* MAP */
+  #map-wrap { position: relative; flex: 1; }
+  #map { width: 100%; height: 100%; }
+
+  /* PIN BUTTONS on map */
+  .pin-controls {
+    position: absolute; top: 10px; left: 10px; z-index: 5;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .pin-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border: none; border-radius: 6px;
+    font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.4); transition: opacity .15s;
+    white-space: nowrap;
+  }
+  .pin-btn:hover { opacity: .88; }
+  .pin-btn.pickup-pin  { background: #fff; color: #c00; }
+  .pin-btn.dropoff-pin { background: #fff; color: var(--blue); }
+  .pin-btn.active      { outline: 3px solid var(--amber); }
+  #pin-hint {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.8); color: #fff; padding: 6px 14px;
+    border-radius: 20px; font-size: 0.82rem; pointer-events: none;
+    display: none; z-index: 5; white-space: nowrap;
+  }
 
   /* SIDEBAR */
   .sidebar {
@@ -104,8 +132,7 @@
   .quote-amount {
     font-size: 1.6rem; font-weight: 700; color: var(--amber);
     background: transparent; border: none; width: 130px;
-    text-align: right; -moz-appearance: textfield;
-    margin-bottom: 0;
+    text-align: right; -moz-appearance: textfield; margin-bottom: 0;
   }
   .quote-amount:focus { outline: none; }
   .quote-amount::-webkit-inner-spin-button { display: none; }
@@ -119,6 +146,7 @@
   .btn-amber { background: var(--amber); color: #000; }
   .btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .btn-green  { background: var(--green); color: #000; }
+  .btn-sm     { padding: 0.35rem 0.75rem; font-size: 0.75rem; width: auto; border-radius: 5px; }
 
   .btn-row { display: flex; gap: 0.5rem; }
   .btn-row .btn { flex: 1; }
@@ -128,16 +156,47 @@
     min-height: 1.2em; color: var(--green);
   }
 
-  .job-log { padding: 1rem 1.25rem; }
-  .job-item {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; font-size: 0.82rem;
+  /* JOB LOG STRIP */
+  #job-strip {
+    background: var(--bg); border-top: 2px solid var(--amber);
+    height: 180px; min-height: 180px; overflow-x: auto; overflow-y: hidden;
+    display: flex; align-items: stretch; gap: 0; flex-shrink: 0;
   }
-  .job-item-header { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
-  .job-name { font-weight: 600; }
-  .job-time { color: var(--muted); font-size: 0.75rem; }
-  .job-addr { color: var(--muted); }
-  .job-quote { color: var(--amber); font-weight: 700; margin-top: 0.25rem; }
+  #job-strip-inner {
+    display: flex; align-items: stretch; gap: 0; padding: 0;
+    min-width: 100%;
+  }
+  .strip-empty {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; color: var(--muted); font-size: 0.85rem; font-style: italic;
+  }
+  .job-card {
+    flex: 0 0 280px; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 3px;
+    font-size: 0.78rem; position: relative; overflow: hidden;
+  }
+  .job-card:hover { background: #222; }
+  .job-card-num {
+    font-size: 0.65rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .job-card-name { font-weight: 700; font-size: 0.88rem; color: var(--text); }
+  .job-card-phone { color: var(--muted); }
+  .job-card-addr { color: var(--muted); line-height: 1.4; }
+  .job-card-addr strong { color: var(--text); font-weight: 600; }
+  .job-card-vehicle { color: var(--muted); font-style: italic; }
+  .job-card-quote { color: var(--amber); font-weight: 700; font-size: 1rem; margin-top: auto; }
+  .job-card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border);
+  }
+  .job-card-time { color: var(--muted); font-size: 0.7rem; }
+  .btn-edit {
+    padding: 3px 10px; font-size: 0.72rem; font-weight: 700;
+    background: var(--border); color: var(--text); border: none;
+    border-radius: 4px; cursor: pointer;
+  }
+  .btn-edit:hover { background: var(--amber); color: #000; }
 
   /* Google autocomplete dark theme */
   .pac-container {
@@ -149,11 +208,8 @@
   .pac-item-query { color: #f59e0b !important; }
   .pac-matched { color: #f59e0b !important; }
 
-  @media (max-width: 700px) {
-    .layout { flex-direction: column; }
-    #map { height: 40vh; flex: none; }
-    .sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); }
-  }
+  /* map crosshair mode */
+  #map.pin-mode { cursor: crosshair !important; }
 </style>
 </head>
 <body>
@@ -171,10 +227,24 @@
 
 <!-- APP -->
 <div id="app">
-  <div class="layout">
 
-    <div id="map"></div>
+  <div class="top-row">
 
+    <!-- MAP -->
+    <div id="map-wrap">
+      <div id="map"></div>
+      <div class="pin-controls">
+        <button class="pin-btn pickup-pin" id="btn-pin-pickup" onclick="activatePin('pickup')">
+          📍 Drop Pickup Pin
+        </button>
+        <button class="pin-btn dropoff-pin" id="btn-pin-dropoff" onclick="activatePin('dropoff')">
+          📍 Drop Drop-off Pin
+        </button>
+      </div>
+      <div id="pin-hint"></div>
+    </div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
 
       <div class="sidebar-header">
@@ -197,9 +267,9 @@
       <div class="section">
         <div class="section-title">Route</div>
         <label>Pickup Address</label>
-        <input type="text" id="pickup" placeholder="Start typing address…">
+        <input type="text" id="pickup" placeholder="Type or drop pin on map…">
         <label>Drop-off Address</label>
-        <input type="text" id="dropoff" placeholder="Start typing address…">
+        <input type="text" id="dropoff" placeholder="Type or drop pin on map…">
         <div class="route-info">
           <div class="route-chip"><span>Distance</span><div id="route-distance">—</div></div>
           <div class="route-chip"><span>Est. Drive</span><div id="route-duration">—</div></div>
@@ -257,22 +327,24 @@
         </div>
       </div>
 
-      <!-- JOB LOG -->
-      <div class="job-log">
-        <div class="section-title" style="padding:0 0 0.5rem;">Today's Jobs</div>
-        <div id="job-list"><p style="color:var(--muted);font-size:0.82rem;">No jobs logged yet.</p></div>
-      </div>
+    </div><!-- /sidebar -->
+  </div><!-- /top-row -->
 
+  <!-- JOB LOG STRIP -->
+  <div id="job-strip">
+    <div id="job-strip-inner">
+      <div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>
     </div>
   </div>
-</div>
+
+</div><!-- /app -->
 
 <script>
   /* AUTH */
   function checkLogin() {
     if (document.getElementById('pwd-input').value.trim() === 'lehigh2026') {
       document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
+      document.getElementById('app').style.display = 'flex';
       initMap();
     } else {
       document.getElementById('login-error').style.display = 'block';
@@ -284,7 +356,11 @@
   });
 
   /* MAP */
-  let map, directionsService, directionsRenderer, distanceMiles = 0;
+  let map, directionsService, directionsRenderer, geocoder;
+  let distanceMiles = 0;
+  let pinMode = null; // 'pickup' | 'dropoff' | null
+  let pinMarkers = { pickup: null, dropoff: null };
+  let pinClickListener = null;
 
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -292,6 +368,7 @@
       zoom: 12,
     });
 
+    geocoder = new google.maps.Geocoder();
     directionsService  = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer({
       map,
@@ -299,12 +376,69 @@
     });
 
     const opts = { componentRestrictions: { country: 'us' } };
-    const pu = new google.maps.places.Autocomplete(document.getElementById('pickup'),  opts);
+    const pu  = new google.maps.places.Autocomplete(document.getElementById('pickup'),  opts);
     const do_ = new google.maps.places.Autocomplete(document.getElementById('dropoff'), opts);
     pu.addListener('place_changed',  calcRoute);
     do_.addListener('place_changed', calcRoute);
   }
 
+  /* DROP PIN */
+  function activatePin(type) {
+    if (pinMode === type) { deactivatePin(); return; }
+    pinMode = type;
+    const mapEl = document.getElementById('map');
+    const hint  = document.getElementById('pin-hint');
+    mapEl.classList.add('pin-mode');
+    hint.style.display = 'block';
+    hint.textContent = type === 'pickup'
+      ? '🔴 Click map to set PICKUP location'
+      : '🔵 Click map to set DROP-OFF location';
+    document.getElementById('btn-pin-pickup').classList.toggle('active',  type === 'pickup');
+    document.getElementById('btn-pin-dropoff').classList.toggle('active', type === 'dropoff');
+
+    if (pinClickListener) google.maps.event.removeListener(pinClickListener);
+    pinClickListener = map.addListener('click', e => {
+      const latLng = e.latLng;
+      placePin(type, latLng);
+      deactivatePin();
+    });
+  }
+
+  function deactivatePin() {
+    pinMode = null;
+    document.getElementById('map').classList.remove('pin-mode');
+    document.getElementById('pin-hint').style.display = 'none';
+    document.getElementById('btn-pin-pickup').classList.remove('active');
+    document.getElementById('btn-pin-dropoff').classList.remove('active');
+    if (pinClickListener) { google.maps.event.removeListener(pinClickListener); pinClickListener = null; }
+  }
+
+  function placePin(type, latLng) {
+    if (pinMarkers[type]) pinMarkers[type].setMap(null);
+
+    pinMarkers[type] = new google.maps.Marker({
+      position: latLng,
+      map,
+      title: type === 'pickup' ? 'Pickup' : 'Drop-off',
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor:   type === 'pickup' ? '#ef4444' : '#4285F4',
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2,
+      }
+    });
+
+    geocoder.geocode({ location: latLng }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        document.getElementById(type).value = results[0].formatted_address;
+        calcRoute();
+      }
+    });
+  }
+
+  /* ROUTE */
   function calcRoute() {
     const p = document.getElementById('pickup').value.trim();
     const d = document.getElementById('dropoff').value.trim();
@@ -328,10 +462,12 @@
 
   function clearRoute() {
     try { directionsRenderer.setDirections({ routes: [] }); } catch(e) {}
+    ['pickup','dropoff'].forEach(t => {
+      document.getElementById(t).value = '';
+      if (pinMarkers[t]) { pinMarkers[t].setMap(null); pinMarkers[t] = null; }
+    });
     document.getElementById('route-distance').textContent = '—';
     document.getElementById('route-duration').textContent = '—';
-    document.getElementById('pickup').value  = '';
-    document.getElementById('dropoff').value = '';
     distanceMiles = 0;
     calcQuote();
   }
@@ -349,17 +485,15 @@
   function sendSMS() {
     const phone  = document.getElementById('cust-phone').value.trim();
     const name   = document.getElementById('cust-name').value.trim() || 'there';
-    const pickup = document.getElementById('pickup').value.trim()  || '(pickup)';
-    const dropoff= document.getElementById('dropoff').value.trim() || '(drop-off)';
+    const pickup = document.getElementById('pickup').value.trim()   || '(pickup)';
+    const dropoff= document.getElementById('dropoff').value.trim()  || '(drop-off)';
     const quote  = document.getElementById('quote-total').value;
     const status = document.getElementById('sms-status');
-
     if (!phone) {
       status.style.color = 'var(--danger)';
       status.textContent = '⚠️ Enter a customer phone number first.';
       return;
     }
-
     const msg = `Hi ${name}! Lehigh Towing Service here. Your tow from ${pickup} to ${dropoff} is confirmed. Est. cost: $${quote}. On our way! Questions? (239) 426-7682.`;
     window.open(`sms:${phone.replace(/\D/g,'')}?body=${encodeURIComponent(msg)}`, '_blank');
     status.style.color = 'var(--green)';
@@ -375,6 +509,7 @@
     const pickup = document.getElementById('pickup').value.trim();
     if (!name && !pickup) { alert('Enter at least a customer name or pickup address.'); return; }
     jobs.unshift({
+      id:      jobs.length + 1,
       name,
       phone:   document.getElementById('cust-phone').value.trim(),
       vehicle: document.getElementById('cust-vehicle').value.trim(),
@@ -382,26 +517,61 @@
       dropoff: document.getElementById('dropoff').value.trim(),
       quote:   document.getElementById('quote-total').value,
       notes:   document.getElementById('job-notes').value.trim(),
+      base:    document.getElementById('rate-base').value,
+      mile:    document.getElementById('rate-mile').value,
+      hook:    document.getElementById('rate-hook').value,
+      extra:   document.getElementById('rate-extra').value,
       time:    new Date()
     });
     renderJobs();
     resetForm();
   }
 
+  function editJob(idx) {
+    const j = jobs[idx];
+    document.getElementById('cust-name').value    = j.name;
+    document.getElementById('cust-phone').value   = j.phone;
+    document.getElementById('cust-vehicle').value = j.vehicle;
+    document.getElementById('pickup').value        = j.pickup;
+    document.getElementById('dropoff').value       = j.dropoff;
+    document.getElementById('job-notes').value     = j.notes;
+    document.getElementById('rate-base').value     = j.base;
+    document.getElementById('rate-mile').value     = j.mile;
+    document.getElementById('rate-hook').value     = j.hook;
+    document.getElementById('rate-extra').value    = j.extra;
+    document.getElementById('quote-total').value   = j.quote;
+    // remove from log (will be re-logged on save)
+    jobs.splice(idx, 1);
+    renderJobs();
+    window.scrollTo(0, 0);
+  }
+
   function renderJobs() {
-    document.getElementById('job-count').textContent = jobs.length + (jobs.length === 1 ? ' job' : ' jobs');
-    document.getElementById('job-list').innerHTML = jobs.length
-      ? jobs.map(j => `
-          <div class="job-item">
-            <div class="job-item-header">
-              <span class="job-name">${j.name || 'Unknown'}${j.vehicle ? ' · ' + j.vehicle : ''}</span>
-              <span class="job-time">${j.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
-            </div>
-            <div class="job-addr">${j.pickup || '—'} → ${j.dropoff || '—'}</div>
-            ${j.notes ? `<div class="job-addr">${j.notes}</div>` : ''}
-            <div class="job-quote">$${parseFloat(j.quote).toFixed(2)}</div>
-          </div>`).join('')
-      : '<p style="color:var(--muted);font-size:0.82rem;">No jobs logged yet.</p>';
+    const count = jobs.length;
+    document.getElementById('job-count').textContent = count + (count === 1 ? ' job' : ' jobs');
+    const inner = document.getElementById('job-strip-inner');
+    if (!count) {
+      inner.innerHTML = '<div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>';
+      return;
+    }
+    inner.innerHTML = jobs.map((j, i) => `
+      <div class="job-card">
+        <div class="job-card-num">Job #${j.id} &nbsp;·&nbsp; ${j.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="job-card-name">${j.name || 'Unknown Customer'}</div>
+        <div class="job-card-phone">${j.phone || '—'}</div>
+        <div class="job-card-addr">
+          <strong>PICKUP:</strong> ${j.pickup || '—'}<br>
+          <strong>DROP-OFF:</strong> ${j.dropoff || '—'}
+        </div>
+        ${j.vehicle ? `<div class="job-card-vehicle">${j.vehicle}</div>` : ''}
+        ${j.notes   ? `<div class="job-card-vehicle">${j.notes}</div>`   : ''}
+        <div class="job-card-quote">$${parseFloat(j.quote).toFixed(2)}</div>
+        <div class="job-card-footer">
+          <span class="job-card-time">${j.time.toLocaleDateString([],{month:'short',day:'numeric'})}</span>
+          <button class="btn-edit" onclick="editJob(${i})">✏️ Edit</button>
+        </div>
+      </div>
+    `).join('');
   }
 
   function resetForm() {
