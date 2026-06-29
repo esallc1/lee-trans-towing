@@ -292,7 +292,7 @@
         <label>Job Type</label>
         <select id="job-type" style="width:100%;padding:0.6rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.9rem;margin-bottom:0.75rem;">
           <option value="Tow">🚛 Tow</option>
-          <option value="Flatbed">🛻 Flatbed</option>
+          <option value="Flatbed">Flatbed</option>
           <option value="Lockout">🔑 Lockout</option>
           <option value="Jumpstart">⚡ Jumpstart</option>
           <option value="Roadside / Fuel">⛽ Roadside / Fuel</option>
@@ -680,6 +680,12 @@
     window.scrollTo(0, 0);
   }
 
+  function jobTypeLabel(type) {
+    if (type === 'Flatbed') return `<img src="flatbed.png" style="height:18px;vertical-align:middle;margin-right:4px;">Flatbed`;
+    const icons = { 'Tow': '🚛', 'Lockout': '🔑', 'Jumpstart': '⚡', 'Roadside / Fuel': '⛽' };
+    return (icons[type] || '') + ' ' + (type || 'Tow');
+  }
+
   function statusClass(s) {
     return { 'Waiting': 'status-waiting', 'Assigned': 'status-assigned', 'En Route': 'status-enroute', 'Complete': 'status-complete' }[s] || '';
   }
@@ -702,7 +708,7 @@
           <span class="status-badge ${statusClass(j.status)}">${j.status}</span>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:1px;">
-          <span class="job-type-tag">${j.jobType || 'Tow'}</span>
+          <span class="job-type-tag">${jobTypeLabel(j.jobType)}</span>
         </div>
         <div class="job-card-name">${j.name || 'Unknown Customer'}</div>
         <div class="job-card-phone">${j.phone || '—'}</div>
