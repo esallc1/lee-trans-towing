@@ -5,562 +5,285 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lehigh Towing — Dispatch</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:       #0d0d0d;
-    --surface:  #161616;
-    --border:   #2a2a2a;
-    --amber:    #f5a623;
-    --amber-dim:#b87a18;
-    --green:    #22c55e;
-    --red:      #ef4444;
-    --text:     #f0f0f0;
-    --muted:    #888;
-    --radius:   6px;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-size: 15px;
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ── */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-    height: 54px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--amber);
-  }
-  .logo span { color: var(--text); }
-  .status-pill {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 4px 12px;
-    border-radius: 99px;
-    background: #1a2e1a;
-    color: var(--green);
-    border: 1px solid #2a4a2a;
-  }
-
-  /* ── LAYOUT ── */
-  .main {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  @media (max-width: 700px) {
-    .main { grid-template-columns: 1fr; }
-  }
-
-  /* ── PANELS ── */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .panel-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .panel-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .panel-body { padding: 16px; }
-
-  /* ── FORM ── */
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 5px;
-  }
-  input, select, textarea {
-    width: 100%;
-    background: #111;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    font-size: 15px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--amber);
-  }
-  select { cursor: pointer; }
-  textarea { resize: vertical; min-height: 64px; }
-
-  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  /* ── RATE CALCULATOR ── */
-  .calc-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-  .calc-row:last-of-type { border-bottom: none; }
-  .calc-label { color: var(--muted); }
-  .calc-value { font-weight: 600; color: var(--text); }
-  .calc-total {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    background: #111;
-    border-top: 1px solid var(--border);
-    margin: 0 -16px -16px;
-  }
-  .calc-total-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .calc-total-value {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 32px;
-    font-weight: 900;
-    color: var(--amber);
-  }
-
-  /* ── BUTTONS ── */
-  .btn {
-    display: block;
-    width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    text-align: center;
-    text-decoration: none;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn-amber { background: var(--amber); color: #000; }
-  .btn-amber:hover { opacity: 0.9; }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    margin-top: 8px;
-  }
-  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
-
-  /* ── MAP ── */
-  .map-frame {
-    width: 100%;
-    height: 220px;
-    background: #111;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .map-frame iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    position: absolute;
-    top: 0; left: 0;
-  }
-  .map-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-  }
-  .map-icon { font-size: 28px; opacity: 0.4; }
-
-  /* ── JOB LOG ── */
-  .full-width { grid-column: 1 / -1; }
-  .log-empty {
-    padding: 32px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-  }
-  .job-card {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 12px;
-    align-items: center;
-  }
-  .job-card:last-child { border-bottom: none; }
-  .job-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px;
-    font-weight: 900;
-    color: var(--amber);
-    min-width: 36px;
-  }
-  .job-info { min-width: 0; }
-  .job-name {
-    font-weight: 600;
-    font-size: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .job-meta {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .job-badge {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 99px;
-  }
-  .badge-dispatched { background: #1a2e1a; color: var(--green); }
-  .badge-pending    { background: #2a1f00; color: var(--amber); }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--green);
-    color: #000;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 12px 24px;
-    border-radius: 99px;
-    transition: transform 0.3s ease;
-    z-index: 999;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ── DIVIDER ── */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
-
-  /* ── RATE INPUTS ── */
-  .rate-config {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .rate-config .field { flex: 1; margin-bottom: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0d0d;--surface:#161616;--border:#2a2a2a;--amber:#f5a623;--green:#22c55e;--text:#f0f0f0;--muted:#888;--r:6px}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:var(--amber)}
+.logo span{color:var(--text)}
+.pill{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:99px;background:#1a2e1a;color:var(--green);border:1px solid #2a4a2a}
+.main{max-width:980px;margin:0 auto;padding:24px 16px 48px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.main{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.ph{padding:12px 16px;border-bottom:1px solid var(--border)}
+.pl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pb{padding:16px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;background:#111;border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;padding:9px 12px;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--amber)}
+textarea{resize:vertical;min-height:64px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* autocomplete */
+.acw{position:relative}
+.acd{position:absolute;top:100%;left:0;right:0;z-index:500;background:#1e1e1e;border:1px solid var(--amber);border-top:none;border-radius:0 0 var(--r) var(--r);max-height:220px;overflow-y:auto;display:none}
+.acd.open{display:block}
+.aci{padding:10px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border)}
+.aci:last-child{border-bottom:none}
+.aci:hover{background:#2a2a2a}
+.aci-main{font-weight:600;color:var(--text)}
+.aci-sub{font-size:12px;color:var(--muted);margin-top:2px}
+/* map */
+#map{width:100%;height:240px;background:#111;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+/* rate */
+.rc{display:flex;gap:10px;margin-bottom:14px}
+.rc .field{flex:1;margin-bottom:0}
+.cr{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.cr:last-of-type{border-bottom:none}
+.cl{color:var(--muted)}
+.cv{font-weight:600}
+.ct{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#111;border-top:1px solid var(--border);margin:0 -16px -16px}
+.ctl{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ctv{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--amber)}
+/* buttons */
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .15s,transform .1s;text-align:center;text-decoration:none}
+.btn:active{transform:scale(.98)}
+.ba{background:var(--amber);color:#000}
+.ba:hover{opacity:.9}
+.bg{background:transparent;border:1px solid var(--border);color:var(--muted);margin-top:8px}
+.bg:hover{border-color:var(--text);color:var(--text)}
+/* log */
+.fw{grid-column:1/-1}
+.le{padding:32px;text-align:center;color:var(--muted);font-size:13px}
+.jc{padding:14px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.jc:last-child{border-bottom:none}
+.jn{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--amber);min-width:36px}
+.ji{min-width:0}
+.jt{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jm{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jb{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:#1a2e1a;color:var(--green)}
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:12px 24px;border-radius:99px;transition:transform .3s ease;z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.mt{font-size:10px;color:var(--amber);font-weight:400;text-transform:none;letter-spacing:0}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">Lehigh <span>Towing</span> Dispatch</div>
-  <div class="status-pill">● Online</div>
+  <div class="pill">● Online</div>
 </header>
 
 <div class="main">
 
-  <!-- LEFT: JOB FORM -->
   <div class="panel">
-    <div class="panel-header">
-      <div class="panel-label">New Job</div>
+    <div class="ph"><div class="pl">New Job</div></div>
+    <div class="pb">
+      <div class="row2">
+        <div class="field"><label>Customer Name</label><input type="text" id="cname" placeholder="John Rivera" autocomplete="off"></div>
+        <div class="field"><label>Customer Phone</label><input type="tel" id="cphone" placeholder="(239) 555-0000"></div>
+      </div>
+      <div class="field"><label>Pickup Address</label>
+        <div class="acw"><input type="text" id="pickup" placeholder="252 Mongoose Ln N, Fort Myers" autocomplete="off"><div class="acd" id="pd"></div></div>
+      </div>
+      <div class="field"><label>Drop-off Address</label>
+        <div class="acw"><input type="text" id="dropoff" placeholder="500 Joel Blvd, Lehigh Acres" autocomplete="off"><div class="acd" id="dd"></div></div>
+      </div>
+      <div id="map"></div>
+      <div class="row2">
+        <div class="field"><label>Service Type</label>
+          <select id="stype"><option>Standard Tow</option><option>Flatbed Tow</option><option>Jump Start</option><option>Lockout</option><option>Tire Change</option><option>Fuel Delivery</option><option>Winch Out</option></select>
+        </div>
+        <div class="field"><label>Vehicle</label><input type="text" id="vehicle" placeholder="2019 Toyota Camry"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="notes" placeholder="Silver sedan, broken down on I-75 southbound..."></textarea></div>
     </div>
-    <div class="panel-body">
-      <div class="row-2">
-        <div class="field">
-          <label>Customer Name</label>
-          <input type="text" id="custName" placeholder="John Rivera" autocomplete="off">
-        </div>
-        <div class="field">
-          <label>Customer Phone</label>
-          <input type="tel" id="custPhone" placeholder="(239) 555-0000">
-        </div>
-      </div>
+  </div>
 
-      <div class="field">
-        <label>Pickup Address</label>
-        <input type="text" id="pickupAddr" placeholder="1234 Lee Blvd, Lehigh Acres, FL" oninput="updateMap()">
-      </div>
-
-      <div class="map-frame" id="mapContainer">
-        <div class="map-placeholder">
-          <div class="map-icon">📍</div>
-          <div>Enter address to see map</div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="panel">
+      <div class="ph"><div class="pl">Rate Calculator</div></div>
+      <div class="pb">
+        <div class="rc">
+          <div class="field"><label>Hookup ($)</label><input type="number" id="hookup" value="75" min="0" oninput="calc()"></div>
+          <div class="field"><label>Per Mile ($)</label><input type="number" id="permile" value="4" min="0" oninput="calc()"></div>
+          <div class="field"><label>Miles <span class="mt" id="mtag">(auto)</span></label><input type="number" id="miles" value="0" min="0" oninput="calc();document.getElementById('mtag').textContent='(manual)'"></div>
         </div>
+        <div class="cr"><span class="cl">Hookup fee</span><span class="cv" id="dh">$75.00</span></div>
+        <div class="cr"><span class="cl">Mileage (<span id="dm">0</span> mi × $<span id="dr">4.00</span>)</span><span class="cv" id="dmg">$0.00</span></div>
+        <div class="ct"><span class="ctl">Quote</span><span class="ctv" id="dt">$75</span></div>
       </div>
-
-      <div class="row-2">
-        <div class="field">
-          <label>Service Type</label>
-          <select id="serviceType">
-            <option value="Standard Tow">Standard Tow</option>
-            <option value="Flatbed Tow">Flatbed Tow</option>
-            <option value="Jump Start">Jump Start</option>
-            <option value="Lockout">Lockout</option>
-            <option value="Tire Change">Tire Change</option>
-            <option value="Fuel Delivery">Fuel Delivery</option>
-            <option value="Winch Out">Winch Out</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Vehicle</label>
-          <input type="text" id="vehicle" placeholder="2019 Toyota Camry">
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Notes</label>
-        <textarea id="notes" placeholder="Silver sedan, broken down on I-75 southbound..."></textarea>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="pl">Dispatch</div></div>
+      <div class="pb">
+        <div class="field"><label>Operator Phone</label><input type="tel" id="opphone" value="(239) 440-2122"></div>
+        <a class="btn ba" onclick="doDispatch()">⚡ Dispatch Now</a>
+        <button class="btn bg" onclick="clearAll()">Clear Form</button>
       </div>
     </div>
   </div>
 
-  <!-- RIGHT: RATE + DISPATCH -->
-  <div style="display:flex; flex-direction:column; gap:20px;">
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-label">Rate Calculator</div>
-      </div>
-      <div class="panel-body">
-        <div class="rate-config">
-          <div class="field">
-            <label>Hookup Fee ($)</label>
-            <input type="number" id="hookupFee" value="75" min="0" oninput="calcRate()">
-          </div>
-          <div class="field">
-            <label>Per Mile ($)</label>
-            <input type="number" id="perMile" value="4" min="0" oninput="calcRate()">
-          </div>
-          <div class="field">
-            <label>Est. Miles</label>
-            <input type="number" id="miles" value="0" min="0" oninput="calcRate()">
-          </div>
-        </div>
-
-        <div class="calc-row">
-          <span class="calc-label">Hookup fee</span>
-          <span class="calc-value" id="displayHookup">$75.00</span>
-        </div>
-        <div class="calc-row">
-          <span class="calc-label">Mileage (<span id="displayMiles">0</span> mi × $<span id="displayRate">4.00</span>)</span>
-          <span class="calc-value" id="displayMileage">$0.00</span>
-        </div>
-
-        <div class="calc-total">
-          <span class="calc-total-label">Quote</span>
-          <span class="calc-total-value" id="displayTotal">$75</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-label">Dispatch</div>
-      </div>
-      <div class="panel-body">
-        <div class="field">
-          <label>Operator Phone</label>
-          <input type="tel" id="operatorPhone" value="(239) 440-2122">
-        </div>
-        <a id="dispatchBtn" class="btn btn-amber" onclick="dispatch()">
-          ⚡ Dispatch Now
-        </a>
-        <button class="btn btn-ghost" onclick="clearForm()">Clear Form</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- FULL WIDTH: JOB LOG -->
-  <div class="panel full-width">
-    <div class="panel-header">
-      <div class="panel-label">Job Log — Today</div>
-    </div>
-    <div id="jobLog">
-      <div class="log-empty">No jobs dispatched yet. First call coming soon. 🚛</div>
-    </div>
+  <div class="panel fw">
+    <div class="ph"><div class="pl">Job Log — Today</div></div>
+    <div id="log"><div class="le">No jobs dispatched yet. First call coming soon. 🚛</div></div>
   </div>
 
 </div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-  let jobCount = 0;
+// ── PASSWORD ──
+(function(){
+  const pw='lehigh2026';
+  if(sessionStorage.getItem('da')===pw)return;
+  document.body.style.display='none';
+  const v=prompt('Dispatcher access code:');
+  if(v===pw){sessionStorage.setItem('da',pw);document.body.style.display='';}
+  else{document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0d0d0d;color:#888;font-family:sans-serif">Access denied.</div>';}
+})();
 
-  function calcRate() {
-    const hookup = parseFloat(document.getElementById('hookupFee').value) || 0;
-    const rate   = parseFloat(document.getElementById('perMile').value) || 0;
-    const miles  = parseFloat(document.getElementById('miles').value) || 0;
-    const mileage = rate * miles;
-    const total  = hookup + mileage;
+let map,dSvc,dRen,acSvc,plSvc,pPlace=null,dPlace=null,jobN=0;
 
-    document.getElementById('displayHookup').textContent  = '$' + hookup.toFixed(2);
-    document.getElementById('displayMiles').textContent   = miles;
-    document.getElementById('displayRate').textContent    = rate.toFixed(2);
-    document.getElementById('displayMileage').textContent = '$' + mileage.toFixed(2);
-    document.getElementById('displayTotal').textContent   = '$' + Math.round(total);
-  }
+window.initMap=function(){
+  map=new google.maps.Map(document.getElementById('map'),{
+    center:{lat:26.611,lng:-81.636},zoom:11,
+    styles:[
+      {elementType:'geometry',stylers:[{color:'#242424'}]},
+      {elementType:'labels.text.fill',stylers:[{color:'#aaaaaa'}]},
+      {elementType:'labels.text.stroke',stylers:[{color:'#1a1a1a'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{color:'#3d3d3d'}]},
+      {featureType:'road.arterial',elementType:'geometry',stylers:[{color:'#484848'}]},
+      {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#606060'}]},
+      {featureType:'water',elementType:'geometry',stylers:[{color:'#17283a'}]},
+      {featureType:'poi',stylers:[{visibility:'off'}]},
+      {featureType:'transit',stylers:[{visibility:'off'}]}
+    ],
+    disableDefaultUI:false,zoomControl:true,streetViewControl:false,mapTypeControl:false,fullscreenControl:false
+  });
+  dSvc=new google.maps.DirectionsService();
+  dRen=new google.maps.DirectionsRenderer({map,polylineOptions:{strokeColor:'#f5a623',strokeWeight:5},suppressMarkers:false});
+  acSvc=new google.maps.places.AutocompleteService();
+  plSvc=new google.maps.places.PlacesService(map);
+  wireAC('pickup','pd',function(p){pPlace=p;route();});
+  wireAC('dropoff','dd',function(p){dPlace=p;route();});
+};
 
-  let mapTimer;
-  function updateMap() {
-    clearTimeout(mapTimer);
-    mapTimer = setTimeout(() => {
-      const addr = document.getElementById('pickupAddr').value.trim();
-      const container = document.getElementById('mapContainer');
-      if (!addr) {
-        container.innerHTML = `<div class="map-placeholder"><div class="map-icon">📍</div><div>Enter address to see map</div></div>`;
-        return;
-      }
-      const encoded = encodeURIComponent(addr);
-      container.innerHTML = `<iframe src="https://maps.google.com/maps?q=${encoded}&output=embed&z=14" allowfullscreen loading="lazy"></iframe>`;
-    }, 800);
-  }
+function wireAC(inputId,dropId,onPick){
+  const inp=document.getElementById(inputId);
+  const drop=document.getElementById(dropId);
+  let t;
+  inp.addEventListener('input',function(){
+    clearTimeout(t);
+    const v=inp.value.trim();
+    if(v.length<3){drop.classList.remove('open');return;}
+    t=setTimeout(function(){
+      acSvc.getPlacePredictions(
+        {input:v,componentRestrictions:{country:'us'},location:new google.maps.LatLng(26.611,-81.636),radius:80000},
+        function(preds,status){
+          drop.innerHTML='';
+          if(status!==google.maps.places.PlacesServiceStatus.OK||!preds){drop.classList.remove('open');return;}
+          preds.slice(0,5).forEach(function(p){
+            const item=document.createElement('div');
+            item.className='aci';
+            item.innerHTML='<div class="aci-main">'+p.structured_formatting.main_text+'</div><div class="aci-sub">'+(p.structured_formatting.secondary_text||'')+'</div>';
+            item.addEventListener('mousedown',function(e){
+              e.preventDefault();
+              inp.value=p.description;
+              drop.classList.remove('open');
+              plSvc.getDetails({placeId:p.place_id,fields:['geometry','formatted_address']},function(place,s){
+                if(s===google.maps.places.PlacesServiceStatus.OK){onPick(place);}
+              });
+            });
+            drop.appendChild(item);
+          });
+          drop.classList.add('open');
+        }
+      );
+    },300);
+  });
+  inp.addEventListener('blur',function(){setTimeout(function(){drop.classList.remove('open');},150);});
+}
 
-  function dispatch() {
-    const name    = document.getElementById('custName').value.trim();
-    const phone   = document.getElementById('custPhone').value.trim();
-    const addr    = document.getElementById('pickupAddr').value.trim();
-    const vehicle = document.getElementById('vehicle').value.trim();
-    const service = document.getElementById('serviceType').value;
-    const notes   = document.getElementById('notes').value.trim();
-    const total   = document.getElementById('displayTotal').textContent;
-    const operator= document.getElementById('operatorPhone').value.replace(/\D/g, '');
+function route(){
+  if(!pPlace){return;}
+  if(!dPlace){map.setCenter(pPlace.geometry.location);map.setZoom(14);return;}
+  dSvc.route({origin:pPlace.geometry.location,destination:dPlace.geometry.location,travelMode:google.maps.TravelMode.DRIVING},function(res,status){
+    if(status==='OK'){
+      dRen.setDirections(res);
+      var mi=(res.routes[0].legs[0].distance.value/1609.34).toFixed(1);
+      document.getElementById('miles').value=mi;
+      document.getElementById('mtag').textContent='(calculated)';
+      calc();
+    }
+  });
+}
 
-    if (!addr) { showToast('⚠️ Enter pickup address', '#ef4444'); return; }
+function calc(){
+  var h=parseFloat(document.getElementById('hookup').value)||0;
+  var r=parseFloat(document.getElementById('permile').value)||0;
+  var m=parseFloat(document.getElementById('miles').value)||0;
+  var mg=r*m;
+  var tot=h+mg;
+  document.getElementById('dh').textContent='$'+h.toFixed(2);
+  document.getElementById('dm').textContent=m;
+  document.getElementById('dr').textContent=r.toFixed(2);
+  document.getElementById('dmg').textContent='$'+mg.toFixed(2);
+  document.getElementById('dt').textContent='$'+Math.round(tot);
+}
 
-    const mapsLink = `https://maps.google.com/?q=${encodeURIComponent(addr)}`;
-    const smsBody =
-      `🚛 NEW JOB — Lehigh Towing\n` +
-      `Service: ${service}\n` +
-      `Customer: ${name || 'N/A'} ${phone ? '· ' + phone : ''}\n` +
-      `Vehicle: ${vehicle || 'N/A'}\n` +
-      `Address: ${addr}\n` +
-      `Quote: ${total}\n` +
-      (notes ? `Notes: ${notes}\n` : '') +
-      `Nav: ${mapsLink}`;
+function doDispatch(){
+  var name=document.getElementById('cname').value.trim();
+  var phone=document.getElementById('cphone').value.trim();
+  var pu=document.getElementById('pickup').value.trim();
+  var dr=document.getElementById('dropoff').value.trim();
+  var veh=document.getElementById('vehicle').value.trim();
+  var svc=document.getElementById('stype').value;
+  var notes=document.getElementById('notes').value.trim();
+  var tot=document.getElementById('dt').textContent;
+  var op=document.getElementById('opphone').value.replace(/\D/g,'');
+  if(!pu){toast('⚠️ Enter pickup address','#ef4444');return;}
+  var nav=dr?'https://maps.google.com/maps?saddr='+encodeURIComponent(pu)+'&daddr='+encodeURIComponent(dr):'https://maps.google.com/?q='+encodeURIComponent(pu);
+  var body='🚛 NEW JOB — Lehigh Towing\nService: '+svc+'\nCustomer: '+(name||'N/A')+(phone?' · '+phone:'')+'\nVehicle: '+(veh||'N/A')+'\nPickup: '+pu+(dr?'\nDrop-off: '+dr:'')+'\nQuote: '+tot+(notes?'\nNotes: '+notes:'')+'\nNav: '+nav;
+  window.location.href='sms:+1'+op+'?&body='+encodeURIComponent(body);
+  logJob(name,svc,pu,dr,veh,tot);
+  toast('✓ Dispatched!');
+}
 
-    const smsLink = `sms:+1${operator}?&body=${encodeURIComponent(smsBody)}`;
-    window.location.href = smsLink;
+function logJob(name,svc,pu,dr,veh,tot){
+  jobN++;
+  var log=document.getElementById('log');
+  var empty=log.querySelector('.le');
+  if(empty)empty.remove();
+  var time=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var c=document.createElement('div');
+  c.className='jc';
+  c.innerHTML='<div class="jn">#'+String(jobN).padStart(2,'0')+'</div><div class="ji"><div class="jt">'+(name||'Unknown')+' — '+svc+'</div><div class="jm">'+pu+(dr?' → '+dr:'')+' · '+(veh||'No vehicle')+' · '+time+' · <strong style="color:var(--amber)">'+tot+'</strong></div></div><div class="jb">Sent</div>';
+  log.prepend(c);
+}
 
-    logJob({ name, phone, addr, vehicle, service, total });
-    showToast('✓ Dispatched!');
-  }
+function clearAll(){
+  ['cname','cphone','pickup','dropoff','vehicle','notes'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('miles').value=0;
+  document.getElementById('stype').selectedIndex=0;
+  document.getElementById('mtag').textContent='(auto)';
+  pPlace=null;dPlace=null;
+  if(dRen){dRen.setMap(null);dRen.setMap(map);}
+  if(map){map.setCenter({lat:26.611,lng:-81.636});map.setZoom(11);}
+  calc();
+}
 
-  function logJob({ name, phone, addr, vehicle, service, total }) {
-    jobCount++;
-    const log = document.getElementById('jobLog');
-    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+function toast(msg,color){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=color||'var(--green)';t.style.color=color?'#fff':'#000';
+  t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);
+}
 
-    // Remove empty state
-    const empty = log.querySelector('.log-empty');
-    if (empty) empty.remove();
-
-    const card = document.createElement('div');
-    card.className = 'job-card';
-    card.innerHTML = `
-      <div class="job-num">#${String(jobCount).padStart(2,'0')}</div>
-      <div class="job-info">
-        <div class="job-name">${name || 'Unknown'} — ${service}</div>
-        <div class="job-meta">${addr} · ${vehicle || 'No vehicle'} · ${time} · <strong style="color:var(--amber)">${total}</strong></div>
-      </div>
-      <div class="job-badge badge-dispatched">Sent</div>
-    `;
-    log.prepend(card);
-  }
-
-  function clearForm() {
-    ['custName','custPhone','pickupAddr','vehicle','notes'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-    document.getElementById('miles').value = 0;
-    document.getElementById('serviceType').selectedIndex = 0;
-    document.getElementById('mapContainer').innerHTML =
-      `<div class="map-placeholder"><div class="map-icon">📍</div><div>Enter address to see map</div></div>`;
-    calcRate();
-  }
-
-  function showToast(msg, color) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.background = color || 'var(--green)';
-    t.style.color = color ? '#fff' : '#000';
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  // Init
-  calcRate();
+calc();
 </script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1BK6DUg7rYYp8asmcykoi6lMkTseEf0s&libraries=places&callback=initMap"></script>
 </body>
 </html>
