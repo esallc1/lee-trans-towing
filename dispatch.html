@@ -228,6 +228,54 @@
 
   /* map crosshair mode */
   #map.pin-mode { cursor: crosshair !important; }
+
+  /* MAP TYPE TOGGLE */
+  .map-type-toggle {
+    position: absolute; top: 10px; right: 10px; z-index: 5;
+    display: flex; border-radius: 6px; overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5);
+  }
+  .map-type-btn {
+    padding: 6px 12px; border: none; font-size: 0.75rem; font-weight: 700;
+    cursor: pointer; background: rgba(20,20,20,0.85); color: #ccc;
+    border-right: 1px solid #444; transition: background 0.15s, color 0.15s;
+  }
+  .map-type-btn:last-child { border-right: none; }
+  .map-type-btn.active { background: var(--amber); color: #000; }
+
+  /* OPERATOR STATUS STRIP */
+  #operator-strip {
+    padding: 5px 1.25rem; background: var(--surface);
+    border-bottom: 1px solid var(--border); border-top: 1px solid var(--border);
+    font-size: 0.78rem; font-weight: 600; flex-shrink: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  #operator-dot { font-size: 0.7rem; }
+
+  /* JOB STATUS BADGE */
+  .status-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 99px;
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .status-waiting  { background: #854d0e; color: #fef08a; }
+  .status-assigned { background: #1e3a8a; color: #bfdbfe; }
+  .status-enroute  { background: #7c2d12; color: #fed7aa; }
+  .status-complete { background: #14532d; color: #bbf7d0; }
+
+  .job-type-tag {
+    font-size: 0.65rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .btn-advance {
+    padding: 3px 10px; font-size: 0.7rem; font-weight: 700;
+    background: #333; color: var(--text); border: none;
+    border-radius: 4px; cursor: pointer;
+  }
+  .btn-advance:hover { background: var(--amber); color: #000; }
+  .btn-advance:disabled { opacity: 0.35; cursor: default; }
+
+  .job-card-eta { font-size: 0.72rem; color: #94a3b8; margin-top: 1px; }
 </style>
 </head>
 <body>
@@ -260,6 +308,11 @@
         </button>
       </div>
       <div id="pin-hint"></div>
+      <div class="map-type-toggle">
+        <button class="map-type-btn" onclick="setMapType('roadmap')">Street</button>
+        <button class="map-type-btn" onclick="setMapType('satellite')">Satellite</button>
+        <button class="map-type-btn active" onclick="setMapType('hybrid')">Hybrid</button>
+      </div>
     </div>
 
     <!-- SIDEBAR -->
@@ -273,6 +326,14 @@
       <!-- CUSTOMER -->
       <div class="section">
         <div class="section-title">Customer</div>
+        <label>Job Type</label>
+        <select id="job-type" style="width:100%;padding:0.6rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.9rem;margin-bottom:0.75rem;">
+          <option value="Tow">🚛 Tow</option>
+          <option value="Flatbed">🛻 Flatbed</option>
+          <option value="Lockout">🔑 Lockout</option>
+          <option value="Jumpstart">⚡ Jumpstart</option>
+          <option value="Roadside / Fuel">⛽ Roadside / Fuel</option>
+        </select>
         <label>Name</label>
         <input type="text" id="cust-name" placeholder="Full name">
         <label>Phone</label>
@@ -348,6 +409,12 @@
     </div><!-- /sidebar -->
   </div><!-- /top-row -->
 
+  <!-- OPERATOR STATUS -->
+  <div id="operator-strip">
+    <span id="operator-dot">🟢</span>
+    <span id="operator-label">Operator: Available</span>
+  </div>
+
   <!-- JOB LOG STRIP -->
   <div id="job-strip-wrap">
     <button class="strip-arrow left"  id="strip-left"  onclick="stripScroll(-1)">&#8592;</button>
@@ -414,14 +481,23 @@
   /* MAP */
   let map, directionsService, directionsRenderer, geocoder;
   let distanceMiles = 0;
+  let etaMinutes = 0;
   let pinMode = null; // 'pickup' | 'dropoff' | null
   let pinMarkers = { pickup: null, dropoff: null };
   let pinClickListener = null;
+
+  function setMapType(type) {
+    const types = { roadmap: google.maps.MapTypeId.ROADMAP, satellite: google.maps.MapTypeId.SATELLITE, hybrid: google.maps.MapTypeId.HYBRID };
+    map.setMapTypeId(types[type]);
+    document.querySelectorAll('.map-type-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
 
   function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       center: { lat: 26.6118, lng: -81.6323 },
       zoom: 12,
+      mapTypeId: google.maps.MapTypeId.HYBRID,
     });
 
     geocoder = new google.maps.Geocoder();
@@ -515,8 +591,9 @@
           directionsRenderer.setDirections(result);
           const leg = result.routes[0].legs[0];
           distanceMiles = leg.distance.value / 1609.34;
+          etaMinutes = Math.round((distanceMiles / 45) * 60);
           document.getElementById('route-distance').textContent = distanceMiles.toFixed(1) + ' mi';
-          document.getElementById('route-duration').textContent = leg.duration.text;
+          document.getElementById('route-duration').textContent = leg.duration.text + ` (~${etaMinutes} min ETA)`;
           calcQuote();
         } else {
           document.getElementById('route-distance').textContent = 'Error';
@@ -534,6 +611,7 @@
     document.getElementById('route-distance').textContent = '—';
     document.getElementById('route-duration').textContent = '—';
     distanceMiles = 0;
+    etaMinutes = 0;
     calcQuote();
   }
 
@@ -546,28 +624,45 @@
     document.getElementById('quote-total').value = (base + mile * distanceMiles + hook + extra).toFixed(2);
   }
 
+  /* OPERATOR STATUS */
+  function setOperatorBusy() {
+    document.getElementById('operator-dot').textContent   = '🔴';
+    document.getElementById('operator-label').textContent = 'Operator: Busy';
+  }
+  function setOperatorAvailable() {
+    document.getElementById('operator-dot').textContent   = '🟢';
+    document.getElementById('operator-label').textContent = 'Operator: Available';
+  }
+
   /* SMS */
   function sendSMS() {
-    const phone  = document.getElementById('cust-phone').value.trim();
-    const name   = document.getElementById('cust-name').value.trim() || 'there';
-    const pickup = document.getElementById('pickup').value.trim()   || '(pickup)';
-    const dropoff= document.getElementById('dropoff').value.trim()  || '(drop-off)';
-    const quote  = document.getElementById('quote-total').value;
-    const status = document.getElementById('sms-status');
+    const phone   = document.getElementById('cust-phone').value.trim();
+    const name    = document.getElementById('cust-name').value.trim() || 'Customer';
+    const pickup  = document.getElementById('pickup').value.trim()    || '(pickup)';
+    const dropoff = document.getElementById('dropoff').value.trim()   || '(drop-off)';
+    const quote   = document.getElementById('quote-total').value;
+    const jobType = document.getElementById('job-type').value;
+    const miles   = distanceMiles > 0 ? distanceMiles.toFixed(1) : '?';
+    const eta     = etaMinutes   > 0 ? etaMinutes : '?';
+    const navLink = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(pickup)}&destination=${encodeURIComponent(dropoff)}`;
+    const status  = document.getElementById('sms-status');
     if (!phone) {
       status.style.color = 'var(--danger)';
       status.textContent = '⚠️ Enter a customer phone number first.';
       return;
     }
-    const msg = `Hi ${name}! Lehigh Towing Service here. Your tow from ${pickup} to ${dropoff} is confirmed. Est. cost: $${quote}. On our way! Questions? (239) 426-7682.`;
+    const msg = `NEW JOB — Lehigh Towing Service\nType: ${jobType}\nCustomer: ${name} (${phone})\nPickup: ${pickup}\nDrop-off: ${dropoff}\nDistance: ${miles} miles | ETA: ~${eta} min\nQuote: $${parseFloat(quote).toFixed(2)}\nNav: ${navLink}`;
     window.open(`sms:${phone.replace(/\D/g,'')}?body=${encodeURIComponent(msg)}`, '_blank');
     status.style.color = 'var(--green)';
     status.textContent = '✅ SMS app opened — tap Send.';
     setTimeout(() => status.textContent = '', 5000);
+    setOperatorBusy();
   }
 
   /* JOB LOG */
   let jobs = [];
+
+  const STATUS_CYCLE = ['Waiting', 'Assigned', 'En Route', 'Complete'];
 
   function logJob() {
     const name   = document.getElementById('cust-name').value.trim();
@@ -586,10 +681,24 @@
       mile:    document.getElementById('rate-mile').value,
       hook:    document.getElementById('rate-hook').value,
       extra:   document.getElementById('rate-extra').value,
+      jobType: document.getElementById('job-type').value,
+      status:  'Waiting',
+      eta:     etaMinutes,
+      miles:   distanceMiles,
       time:    new Date()
     });
     renderJobs();
     resetForm();
+  }
+
+  function advanceStatus(idx) {
+    const j = jobs[idx];
+    const cur = STATUS_CYCLE.indexOf(j.status);
+    if (cur < STATUS_CYCLE.length - 1) {
+      j.status = STATUS_CYCLE[cur + 1];
+      if (j.status === 'Complete') setOperatorAvailable();
+    }
+    renderJobs();
   }
 
   function editJob(idx) {
@@ -605,10 +714,17 @@
     document.getElementById('rate-hook').value     = j.hook;
     document.getElementById('rate-extra').value    = j.extra;
     document.getElementById('quote-total').value   = j.quote;
+    document.getElementById('job-type').value      = j.jobType || 'Tow';
+    distanceMiles = j.miles || 0;
+    etaMinutes    = j.eta   || 0;
     // remove from log (will be re-logged on save)
     jobs.splice(idx, 1);
     renderJobs();
     window.scrollTo(0, 0);
+  }
+
+  function statusClass(s) {
+    return { 'Waiting': 'status-waiting', 'Assigned': 'status-assigned', 'En Route': 'status-enroute', 'Complete': 'status-complete' }[s] || '';
   }
 
   function renderJobs() {
@@ -617,32 +733,45 @@
     const inner = document.getElementById('job-strip-inner');
     if (!count) {
       inner.innerHTML = '<div class="strip-empty">No jobs logged yet — dispatched jobs will appear here.</div>';
+      updateArrows();
       return;
     }
-    inner.innerHTML = jobs.map((j, i) => `
+    inner.innerHTML = jobs.map((j, i) => {
+      const isDone = j.status === 'Complete';
+      const nextLabel = STATUS_CYCLE[STATUS_CYCLE.indexOf(j.status) + 1] || '';
+      return `
       <div class="job-card">
-        <div class="job-card-num">Job #${j.id} &nbsp;·&nbsp; ${j.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+          <div class="job-card-num">Job #${j.id} · ${j.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+          <span class="status-badge ${statusClass(j.status)}">${j.status}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:1px;">
+          <span class="job-type-tag">${j.jobType || 'Tow'}</span>
+        </div>
         <div class="job-card-name">${j.name || 'Unknown Customer'}</div>
         <div class="job-card-phone">${j.phone || '—'}</div>
         <div class="job-card-addr">
           <strong>PICKUP:</strong> ${j.pickup || '—'}<br>
           <strong>DROP-OFF:</strong> ${j.dropoff || '—'}
         </div>
+        ${j.eta ? `<div class="job-card-eta">📍 ${j.miles > 0 ? j.miles.toFixed(1)+' mi · ' : ''}ETA ~${j.eta} min</div>` : ''}
         ${j.vehicle ? `<div class="job-card-vehicle">${j.vehicle}</div>` : ''}
         ${j.notes   ? `<div class="job-card-vehicle">${j.notes}</div>`   : ''}
         <div class="job-card-quote">$${parseFloat(j.quote).toFixed(2)}</div>
         <div class="job-card-footer">
-          <span class="job-card-time">${j.time.toLocaleDateString([],{month:'short',day:'numeric'})}</span>
+          <button class="btn-advance" onclick="advanceStatus(${i})" ${isDone ? 'disabled' : ''}>${isDone ? '✅ Done' : '→ ' + nextLabel}</button>
           <button class="btn-edit" onclick="editJob(${i})">✏️ Edit</button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
+    updateArrows();
   }
 
   function resetForm() {
     ['cust-name','cust-phone','cust-vehicle','job-notes'].forEach(id =>
       document.getElementById(id).value = '');
     ['rate-hook','rate-extra'].forEach(id => document.getElementById(id).value = 0);
+    document.getElementById('job-type').value = 'Tow';
     clearRoute();
     document.getElementById('sms-status').textContent = '';
   }
